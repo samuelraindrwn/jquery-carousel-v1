@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Responsive Carousel with Auto-Looping and Pause on Hover</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      body {
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .carousel {
+        border: 1px solid red;
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+      }
+
+      .carousel .wrapper {
+        border: 1px solid blue;
+        overflow: hidden;
+      }
+
+      .carousel .item-wrapper {
+        display: flex;
+        padding: 10px;
+      }
+      .carousel .item-wrapper .item {
+        width: 100px;
+        height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgb(78, 186, 150);
+      }
+
+      .carousel .item-wrapper .item:nth-child(odd) {
+        background-color: rgb(211, 211, 47);
+      }
+
+      .carousel .controls {
+        background-color: aliceblue;
+        display: flex;
+        justify-content: center;
+        padding: 10px;
+        gap: 20px;
+      }
+
+      .bullet-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .carousel-bullet {
+        scale: 0.8;
+        transition: 0.3s ease-in-out;
+        outline: none;
+        border: none;
+        background-color: rgb(207, 207, 207);
+      }
+
+      .carousel-bullet.active {
+        scale: 1;
+        background-color: rgb(226, 113, 113);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="carousel">
+      <div class="wrapper">
+        <div class="item-wrapper">
+          <div class="item">0</div>
+          <div class="item">1</div>
+          <div class="item">2</div>
+          <div class="item">3</div>
+          <div class="item">4</div>
+          <div class="item">5</div>
+          <div class="item">6</div>
+          <div class="item">7</div>
+          <div class="item">8</div>
+          <div class="item">9</div>
+          <div class="item">10</div>
+          <div class="item">11</div>
+          <div class="item">12</div>
+          <div class="item">13</div>
+          <div class="item">14</div>
+          <div class="item">15</div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="control prev">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="bullet-wrapper"></div>
+        <button class="control next">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+      $(function () {
+        function createCarousel(customConfig) {
+          const config = {
+            container: ".carousel",
+            wrapper: ".carousel .wrapper",
+            itemWrapper: ".carousel .item-wrapper",
+            bulletWrapper: ".carousel .controls .bullet-wrapper",
+            item: ".carousel .item-wrapper .item",
+            prevBtn: ".carousel .controls .control.prev",
+            nextBtn: ".carousel .controls .control.next",
+            visibleItems: 4,
+            slideBy: 4,
+            itemGap: 20,
+            bullet: true,
+            transition: 300,
+            infiniteCarousel: false,
+            autoLoop: false,
+            loopInterval: 3000,
+            responsive: {
+              1200: { visibleItems: 4, slideBy: 4, bullet: true },
+              992: { visibleItems: 3, slideBy: 3, bullet: true },
+              768: { visibleItems: 2, slideBy: 2, bullet: false },
+              576: { visibleItems: 1, slideBy: 1, bullet: false },
+            },
+            ...customConfig,
+          };
+
+          const container = $(config.container);
+          const wrapper = $(config.wrapper);
+          const itemWrapper = $(config.itemWrapper);
+          const prev = $(config.prevBtn);
+          const next = $(config.nextBtn);
+          const items = $(config.item);
+
+          let totalItems = items.length;
+          const itemWidth = $(config.item).width();
+
+          let currentIndex = 0;
+          let maxIndex;
+
+          const setResponsiveConfig = () => {
+            const screenWidth = $(window).width();
+            let matchedConfig = {
+              visibleItems: config.visibleItems,
+              slideBy: config.slideBy,
+              bullet: config.bullet,
+            };
+
+            Object.keys(config.responsive).forEach((breakpoint) => {
+              if (screenWidth >= breakpoint) {
+                matchedConfig = config.responsive[breakpoint];
+              }
+            });
+
+            config.visibleItems = matchedConfig.visibleItems;
+            config.slideBy = matchedConfig.slideBy;
+            config.bullet = matchedConfig.bullet;
+            maxIndex = Math.floor(
+              (totalItems - config.visibleItems) / config.slideBy
+            );
+            const wrapperWidth =
+              itemWidth * config.visibleItems +
+              config.itemGap * (config.visibleItems - 1);
+
+            itemWrapper.css({
+              gap: `${config.itemGap}px`,
+              maxWidth: `${wrapperWidth}px`,
+              transition: `${config.transition}ms ease-in-out`,
+            });
+
+            wrapper.css("width", "fit-content");
+
+            items.css({
+              minWidth: `${itemWidth}px`,
+              margin: "0px",
+            });
+
+            slideCarousel(currentIndex, maxIndex);
+
+            if (config.bullet) {
+              activateBullet(true);
+              updateBullet(currentIndex);
+            } else {
+              bulletWrapper.css("display", "none");
+            }
+          };
+
+          const slideCarousel = (currentIndex, maxIndex) => {
+            toggleControl(currentIndex, maxIndex);
+
+            const slideBy =
+              -currentIndex * config.slideBy * itemWidth -
+              config.slideBy * config.itemGap * currentIndex;
+
+            itemWrapper.css("transform", `translateX(${slideBy}px)`);
+          };
+
+          const toggleControl = (currentIndex, maxIndex) => {
+            if (config.infiniteCarousel) return;
+            next.prop("disabled", currentIndex >= maxIndex);
+            prev.prop("disabled", currentIndex <= 0);
+          };
+
+          next.click(function () {
+            currentIndex++;
+
+            if (currentIndex > maxIndex) {
+              currentIndex = 0;
+            }
+
+            if (config.bullet) {
+              updateBullet(currentIndex);
+            }
+            slideCarousel(currentIndex, maxIndex);
+          });
+
+          prev.click(function () {
+            currentIndex--;
+
+            if (currentIndex < 0) {
+              currentIndex = maxIndex;
+            }
+
+            if (config.bullet) {
+              updateBullet(currentIndex);
+            }
+            slideCarousel(currentIndex, maxIndex);
+          });
+
+          const bulletWrapper = $(config.bulletWrapper);
+
+          function activateBullet(active) {
+            bulletWrapper.empty();
+
+            function createBullet(index) {
+              let bullet = `<button id=bullet-${index} class=carousel-bullet></button>`;
+
+              bulletWrapper.append(bullet);
+              bullet = $(config.bulletWrapper + ` #bullet-${index}`);
+
+              bullet.css({
+                "min-height": "15px",
+                "min-width": "15px",
+                "border-radius": "50%",
+                cursor: "pointer",
+              });
+
+              bullet.click(function () {
+                currentIndex = index;
+                updateBullet(currentIndex);
+                slideCarousel(currentIndex, maxIndex);
+              });
+            }
+
+            if (active) {
+              let temp = maxIndex;
+
+              if (config.slideBy % 2 != 0) temp++;
+
+              for (let i = 0; i <= temp; i++) createBullet(i);
+            } else bulletWrapper.css("display", "none");
+          }
+
+          function updateBullet(index) {
+            const bullet = $(config.bulletWrapper + ` #bullet-${index}`);
+
+            bullet.parent(bulletWrapper).find(".active").removeClass("active");
+            bullet.addClass("active");
+          }
+
+          activateBullet(config.bullet);
+          updateBullet(currentIndex);
+
+          let autoLoop;
+
+          function startAutoLoop() {
+            if (config.autoLoop) {
+              autoLoop = setInterval(() => {
+                next.click();
+              }, config.loopInterval);
+            }
+          }
+
+          function stopAutoLoop() {
+            clearInterval(autoLoop);
+          }
+
+          container.hover(stopAutoLoop, startAutoLoop);
+          startAutoLoop();
+
+          $(window).resize(function () {
+            setResponsiveConfig();
+          });
+
+          setResponsiveConfig();
+        }
+
+        createCarousel();
+      });
+    </script>
+  </body>
+</html>
