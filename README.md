@@ -83,27 +83,16 @@ $(function () {
 
 ---
 
-## 🖼️ Tangkapan Layar
-
-Tambahkan tangkapan layar carousel Anda untuk membantu pengguna memahami bagaimana tampilannya.
-
----
-
 ## ⚠️ Catatan
 
 - Pastikan file CSS dan JavaScript di-link dengan benar.
 - Gunakan class yang sesuai agar tidak terjadi konflik dengan elemen lain.
 - Tes pada berbagai perangkat untuk memastikan kompatibilitas.
+- Kalian juga bisa memodifikasi container dan wrapper-nya sesuka hati kalian.
 
 ---
 
 ## 🤝 Kontribusi
 
 Jika Anda memiliki saran atau ingin berkontribusi untuk meningkatkan proyek ini, jangan ragu untuk mengirimkan pull request atau membuka issue.
-
----
-
-## 📜 Lisensi
-
-Proyek ini menggunakan lisensi MIT. Anda bebas menggunakannya untuk keperluan pribadi maupun komersial. Jangan lupa untuk memberikan kredit! 😄
 
