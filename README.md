@@ -1,5 +1,3 @@
-# Dokumentasi Carousel Responsif dengan Auto-Looping dan Pause on Hover
-
 ## 📋 Deskripsi
 
 Kode ini adalah implementasi carousel responsif yang mendukung fitur auto-looping, pause on hover, navigasi tombol, serta bullet pagination. Carousel ini dirancang fleksibel dengan kemampuan penyesuaian melalui konfigurasi responsif untuk berbagai ukuran layar. Sangat cocok untuk ditambahkan ke proyek web modern.
