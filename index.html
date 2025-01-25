@@ -215,10 +215,12 @@
           next.click(function () {
             currentIndex++;
 
-            if (currentIndex > maxIndex) {
-              currentIndex = 0;
+            if (config.infiniteCarousel) {
+              if (currentIndex > maxIndex) {
+                currentIndex = 0;
+              }
             }
-
+            
             if (config.bullet) {
               updateBullet(currentIndex);
             }
@@ -228,10 +230,12 @@
           prev.click(function () {
             currentIndex--;
 
-            if (currentIndex < 0) {
-              currentIndex = maxIndex;
+            if (config.infiniteCarousel) {
+              if (currentIndex < 0) {
+                currentIndex = maxIndex;
+              }
             }
-
+            
             if (config.bullet) {
               updateBullet(currentIndex);
             }
